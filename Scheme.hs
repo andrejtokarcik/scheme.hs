@@ -1,8 +1,20 @@
 module Main where
 
 import Control.Monad (liftM)
+import Data.Maybe (fromJust)
 import System.Environment (getArgs)
 import Text.ParserCombinators.Parsec
+
+
+-----
+-- http://stackoverflow.com/questions/5921573/convert-a-string-representing-a-binary-number-to-a-base-10-string-haskell
+import Data.Char  (digitToInt)
+import Data.Maybe (listToMaybe)
+import Numeric    (readInt)
+
+readBin :: Integral a => String -> Maybe a
+readBin = fmap fst . listToMaybe . readInt 2 (`elem` "01") digitToInt
+-----
 
 data LispVal = Atom String
              | List [LispVal]
@@ -26,7 +38,17 @@ parseAtom = do
       symbol = oneOf "!#$%&|*+-/:<=>?@^_~"
 
 parseNumber :: Parser LispVal
-parseNumber = liftM (Number . read) $ many1 digit
+parseNumber = liftM Number $ (char '#' >> (bin <|> oct <|> hex <|> dec)) <|> noPrefix
+  where
+      bin = char 'b' >>
+            many1 (oneOf ['0', '1']) >>= return . fromJust . readBin
+      oct = char 'o' >>
+            many1 (oneOf ['0'..'7']) >>= return . read . ("0o"++)
+      hex = char 'x' >>
+            many1 (digit <|> oneOf (['a'..'f'] ++ ['A'..'F'])) >>= return . read . ("0x"++)
+      dec = char 'd' >> noPrefix
+      noPrefix = many1 digit >>= return . read
+
 
 parseString :: Parser LispVal
 parseString = do
@@ -44,9 +66,9 @@ parseString = do
       replacements = ['\n', '\r', '\t', '\\', '\"']
 
 parseExpr :: Parser LispVal
-parseExpr =  parseAtom
+parseExpr =  parseNumber
          <|> parseString
-         <|> parseNumber
+         <|> parseAtom
 
 readExpr :: String -> String
 readExpr input = case parse parseExpr "lisp" input of
