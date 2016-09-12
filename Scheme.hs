@@ -1,6 +1,7 @@
 module Main where
 
 import Control.Monad (liftM)
+import Data.List.Split (chunksOf)
 import Data.Maybe (fromJust)
 import System.Environment (getArgs)
 import Text.ParserCombinators.Parsec
@@ -17,11 +18,12 @@ readBin = fmap fst . listToMaybe . readInt 2 (`elem` "01") digitToInt
 -----
 
 data LispVal = Atom String
+             | Bool Bool
              | List [LispVal]
              | DottedList [LispVal] LispVal
              | Number Integer
+             | Char Char
              | String String
-             | Bool Bool
   deriving Show
 
 parseAtom :: Parser LispVal
@@ -49,6 +51,12 @@ parseNumber = liftM Number $ (char '#' >> (bin <|> oct <|> hex <|> dec)) <|> noP
       dec = char 'd' >> noPrefix
       noPrefix = many1 digit >>= return . read
 
+parseChar :: Parser LispVal
+parseChar = string "#\\" >> choice (zipWith replace codes replacements) >>= return . Char
+  where
+      replace code replacement = string code >> return replacement
+      codes        = [" ", "space", "newline", "(", ")"] ++ chunksOf 1 (['a'..'z'] ++ ['A'..'Z'])
+      replacements = [' ', ' ', '\n', '(', ')'] ++ ['a'..'z'] ++ ['A'..'Z']
 
 parseString :: Parser LispVal
 parseString = do
@@ -58,17 +66,18 @@ parseString = do
                 return $ String x
   where
       stringElem :: Parser Char
-      stringElem =  (char '\\' >> choice (zipWith escapedChar codes replacements))
+      stringElem =  (char '\\' >> choice (zipWith replace codes replacements))
                 <|> noneOf ['"']
       -- http://codereview.stackexchange.com/questions/2406/parsing-strings-with-escaped-characters-using-parsec
-      escapedChar code replacement = char code >> return replacement
+      replace code replacement = char code >> return replacement
       codes        = ['n',  'r',  't',  '\\', '\"']
       replacements = ['\n', '\r', '\t', '\\', '\"']
 
 parseExpr :: Parser LispVal
-parseExpr =  parseNumber
-         <|> parseString
-         <|> parseAtom
+parseExpr =  try parseNumber
+         <|> try parseChar
+         <|> try parseString
+         <|> try parseAtom
 
 readExpr :: String -> String
 readExpr input = case parse parseExpr "lisp" input of
