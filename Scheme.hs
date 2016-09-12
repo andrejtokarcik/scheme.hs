@@ -25,7 +25,9 @@ parseAtom = do
       symbol = oneOf "!#$%&|*+-/:<=>?@^_~"
 
 parseNumber :: Parser LispVal
-parseNumber = liftM (Number . read) $ many1 digit
+parseNumber = -- liftM (Number . read) $ many1 digit
+            do digits <- many1 digit
+               return $ Number $ read digits
 
 parseString :: Parser LispVal
 parseString = do
