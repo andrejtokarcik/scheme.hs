@@ -19,25 +19,25 @@ readBin = fmap fst . listToMaybe . readInt 2 (`elem` "01") digitToInt
 
 data LispVal = Atom String
              | Bool Bool
-             | List [LispVal]
-             | DottedList [LispVal] LispVal
              | Number Integer
              | Char Char
              | String String
+             | List [LispVal]
+             | DottedList [LispVal] LispVal
   deriving Show
 
 parseAtom :: Parser LispVal
 parseAtom = do
-              first <- letter <|> symbol
+              first <- letter
               rest <- many (letter <|> digit <|> symbol)
-              let atom = first : rest
-              return $ case atom of
-                         "#t" -> Bool True
-                         "#f" -> Bool False
-                         _    -> Atom atom
+              return . Atom $ first : rest
   where
       symbol :: Parser Char
       symbol = oneOf "!#$%&|*+-/:<=>?@^_~"
+
+parseBool :: Parser LispVal
+parseBool =  (string "#t" >> return (Bool True))
+         <|> (string "#f" >> return (Bool False))
 
 parseNumber :: Parser LispVal
 parseNumber = liftM Number $ (char '#' >> (bin <|> oct <|> hex <|> dec)) <|> noPrefix
@@ -89,11 +89,12 @@ parseQuoted = do
     return $ List [Atom "quote", x]
 
 parseExpr :: Parser LispVal
-parseExpr =  try parseNumber
+parseExpr =  try parseAtom
+         <|> try parseBool
+         <|> try parseNumber
          <|> try parseChar
          <|> try parseString
          <|> try parseQuoted
-         <|> try parseAtom
          <|> do char '('
                 x <- try parseList <|> parseDottedList
                 char ')'
