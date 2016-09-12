@@ -73,11 +73,31 @@ parseString = do
       codes        = ['n',  'r',  't',  '\\', '\"']
       replacements = ['\n', '\r', '\t', '\\', '\"']
 
+parseList :: Parser LispVal
+parseList = liftM List (parseExpr `sepBy1` spaces)
+
+parseDottedList :: Parser LispVal
+parseDottedList = do
+    head <- parseExpr `endBy` spaces
+    tail <- char '.' >> spaces >> parseExpr
+    return $ DottedList head tail
+
+parseQuoted :: Parser LispVal
+parseQuoted = do
+    char '\''
+    x <- parseExpr
+    return $ List [Atom "quote", x]
+
 parseExpr :: Parser LispVal
 parseExpr =  try parseNumber
          <|> try parseChar
          <|> try parseString
+         <|> try parseQuoted
          <|> try parseAtom
+         <|> do char '('
+                x <- try parseList <|> parseDottedList
+                char ')'
+                return x
 
 readExpr :: String -> String
 readExpr input = case parse parseExpr "lisp" input of
