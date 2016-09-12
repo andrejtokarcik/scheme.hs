@@ -26,8 +26,7 @@ parseAtom = do
 
 parseNumber :: Parser LispVal
 parseNumber = -- liftM (Number . read) $ many1 digit
-            do digits <- many1 digit
-               return $ Number $ read digits
+              many1 digit >>= return . Number . read
 
 parseString :: Parser LispVal
 parseString = do
