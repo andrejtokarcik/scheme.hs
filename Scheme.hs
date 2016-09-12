@@ -30,9 +30,13 @@ parseNumber = liftM (Number . read) $ many1 digit
 parseString :: Parser LispVal
 parseString = do
                 char '"'
-                x <- many (noneOf "\"")
+                x <- many $ stringElem
                 char '"'
                 return $ String x
+  where
+      stringElem :: Parser Char
+      stringElem =  (char '\\' >> (char '"' <|> char '\\'))
+                <|> noneOf ['"']
 
 parseExpr :: Parser LispVal
 parseExpr = parseAtom
