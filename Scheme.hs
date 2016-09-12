@@ -36,8 +36,12 @@ parseString = do
                 return $ String x
   where
       stringElem :: Parser Char
-      stringElem =  (char '\\' >> (char '"' <|> char '\\'))
+      stringElem =  (char '\\' >> choice (zipWith escapedChar codes replacements))
                 <|> noneOf ['"']
+      -- http://codereview.stackexchange.com/questions/2406/parsing-strings-with-escaped-characters-using-parsec
+      escapedChar code replacement = char code >> return replacement
+      codes        = ['n',  'r',  't',  '\\', '\"']
+      replacements = ['\n', '\r', '\t', '\\', '\"']
 
 parseExpr :: Parser LispVal
 parseExpr =  parseAtom
