@@ -27,8 +27,9 @@ parseAtom = do
       symbol = oneOf "!$%&|*+-/:<=>?@^_~"
 
 parseBool :: Parser LispVal
-parseBool =  (string "#t" >> return (Bool True))
-         <|> (string "#f" >> return (Bool False))
+parseBool = char '#' >>
+            ((char 't' >> return (Bool True))
+         <|> (char 'f' >> return (Bool False)))
 
 parseNumber :: Parser LispVal
 parseNumber = liftM Number $ (char '#' >> (bin <|> oct <|> hex <|> dec)) <|> noPrefix
