@@ -1,8 +1,7 @@
 import System.Environment (getArgs)
 
+import Eval
 import Parser
 
 main :: IO ()
-main = do
-         (expr:_) <- getArgs
-         putStrLn . show . readExpr $ expr
+main = getArgs >>= print . eval . readExpr . head
