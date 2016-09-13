@@ -38,7 +38,6 @@ isNumber _          = Bool False
 
 isSymbol :: [LispVal] -> LispVal
 isSymbol [Atom _]                 = Bool True
-isSymbol [List [Atom "quote", _]] = Bool True
 isSymbol _                        = Bool False
 
 apply :: String -> [LispVal] -> LispVal
