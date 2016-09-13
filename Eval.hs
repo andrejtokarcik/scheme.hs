@@ -12,7 +12,9 @@ primitives =  [("+", numericBinOp (+)),
                ("remainder", numericBinOp rem),
                ("string?", isString),
                ("number?", isNumber),
-               ("symbol?", isSymbol)]
+               ("symbol?", isSymbol),
+               ("symbol->string", symbolToString),
+               ("string->symbol", stringToSymbol)]
 
 numericBinOp :: (Integer -> Integer -> Integer) -> [LispVal] -> LispVal
 numericBinOp op params = Number $ foldl1 op $ map unpackNum params
@@ -39,6 +41,12 @@ isNumber _          = Bool False
 isSymbol :: [LispVal] -> LispVal
 isSymbol [Atom _]                 = Bool True
 isSymbol _                        = Bool False
+
+symbolToString :: [LispVal] -> LispVal
+symbolToString [Atom s] = String s
+
+stringToSymbol :: [LispVal] -> LispVal
+stringToSymbol [String s] = Atom s
 
 apply :: String -> [LispVal] -> LispVal
 apply func args = maybe (error "meh apply") ($ args) $ lookup func primitives
