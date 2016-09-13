@@ -66,7 +66,7 @@ parseString = do
       replacements = ['\n', '\r', '\t', '\\', '\"']
 
 parseList :: Parser LispVal
-parseList = liftM List (parseExpr `sepBy1` spaces)
+parseList = liftM List (parseExpr `sepBy` spaces)
 
 parseDottedList :: Parser LispVal
 parseDottedList = do
