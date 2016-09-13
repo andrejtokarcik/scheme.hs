@@ -5,6 +5,7 @@ import Data.List.Split (chunksOf)
 import Data.Maybe (fromJust)
 import Text.ParserCombinators.Parsec
 
+import Internal
 
 -----
 -- http://stackoverflow.com/questions/5921573/convert-a-string-representing-a-binary-number-to-a-base-10-string-haskell
@@ -15,15 +16,6 @@ import Numeric    (readInt)
 readBin :: Integral a => String -> Maybe a
 readBin = fmap fst . listToMaybe . readInt 2 (`elem` "01") digitToInt
 -----
-
-data LispVal = Atom String
-             | Bool Bool
-             | Number Integer
-             | Char Char
-             | String String
-             | List [LispVal]
-             | DottedList [LispVal] LispVal
-  deriving Show
 
 parseAtom :: Parser LispVal
 parseAtom = do
@@ -99,7 +91,12 @@ parseExpr =  try parseAtom
                 char ')'
                 return x
 
+{-
 readExpr :: String -> String
 readExpr input = case parse parseExpr "lisp" input of
     Left  err -> "No match: " ++ show err
     Right val -> "Found value: " ++ show val
+-}
+readExpr :: String -> LispVal
+readExpr = either (\ err -> error $ show err) (\ val -> val)
+         . parse parseExpr "lisp"

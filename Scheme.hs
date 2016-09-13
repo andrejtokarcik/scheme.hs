@@ -5,4 +5,4 @@ import Parser
 main :: IO ()
 main = do
          (expr:_) <- getArgs
-         putStrLn (readExpr expr)
+         putStrLn . show . readExpr $ expr
