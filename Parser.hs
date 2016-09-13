@@ -19,12 +19,12 @@ readBin = fmap fst . listToMaybe . readInt 2 (`elem` "01") digitToInt
 
 parseAtom :: Parser LispVal
 parseAtom = do
-              first <- letter
-              rest <- many (letter <|> digit <|> symbol)
+              first <- letter <|> symbol
+              rest <- many (letter <|> digit <|> symbol <|> char '#')
               return . Atom $ first : rest
   where
       symbol :: Parser Char
-      symbol = oneOf "!#$%&|*+-/:<=>?@^_~"
+      symbol = oneOf "!$%&|*+-/:<=>?@^_~"
 
 parseBool :: Parser LispVal
 parseBool =  (string "#t" >> return (Bool True))
