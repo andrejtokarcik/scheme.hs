@@ -1,7 +1,4 @@
-module Internal
-    ( module Internal
-    , module Control.Monad.Error
-    ) where
+module Internal where
 
 import Control.Monad.Error
 import Text.ParserCombinators.Parsec (ParseError)

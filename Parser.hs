@@ -66,6 +66,12 @@ parseString = do
       codes        = ['n',  'r',  't',  '\\', '\"']
       replacements = ['\n', '\r', '\t', '\\', '\"']
 
+parseQuoted :: Parser LispVal
+parseQuoted = do
+    char '\''
+    x <- parseExpr
+    return $ List [Atom "quote", x]
+
 parseList :: Parser LispVal
 parseList = liftM List (parseExpr `sepBy` spaces)
 
@@ -74,12 +80,6 @@ parseDottedList = do
     head <- parseExpr `endBy` spaces
     tail <- char '.' >> spaces >> parseExpr
     return $ DottedList head tail
-
-parseQuoted :: Parser LispVal
-parseQuoted = do
-    char '\''
-    x <- parseExpr
-    return $ List [Atom "quote", x]
 
 parseExpr :: Parser LispVal
 parseExpr =  try parseAtom
