@@ -13,7 +13,21 @@ data LispVal = Atom String
              | String String
              | List [LispVal]
              | DottedList [LispVal] LispVal
-    deriving Show
+
+showVal :: LispVal -> String
+showVal (String contents) = "\"" ++ contents ++ "\""
+showVal (Atom name) = name
+showVal (Number contents) = show contents
+showVal (Bool True) = "#t"
+showVal (Bool False) = "#f"
+showVal (List contents) = "(" ++ unwordsList contents ++ ")"
+showVal (DottedList head tail) = "(" ++ unwordsList head ++ " . " ++ showVal tail ++ ")"
+
+unwordsList :: [LispVal] -> String
+unwordsList = unwords . map showVal
+
+instance Show LispVal where
+    show = showVal
 
 data LispError = NumArgs Integer [LispVal]
                | TypeMismatch String LispVal
@@ -28,7 +42,7 @@ showError (UnboundVar message varname)  = message ++ ": " ++ varname
 showError (BadSpecialForm message form) = message ++ ": " ++ show form
 showError (NotFunction message func)    = message ++ ": " ++ show func
 showError (NumArgs expected found)      = "Expected " ++ show expected 
-                                       ++ " args; found values: " ++ (unwords $ map show found)
+                                       ++ " args; found values: " ++ unwordsList found
 showError (TypeMismatch expected found) = "Invalid type: expected " ++ expected
                                        ++ ", found " ++ show found
 showError (Parser parseErr)             = "Parse error at " ++ show parseErr
