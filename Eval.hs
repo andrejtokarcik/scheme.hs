@@ -2,7 +2,7 @@ module Eval where
 
 import Internal
 
-primitives :: [(String, [LispVal] -> LispVal)]
+primitives :: [(String, [LispVal] -> ThrowsError LispVal)]
 primitives =  [("+", numericBinOp (+)),
                ("-", numericBinOp (-)),
                ("*", numericBinOp (*)),
@@ -10,53 +10,58 @@ primitives =  [("+", numericBinOp (+)),
                ("mod", numericBinOp mod),
                ("quotient", numericBinOp quot),
                ("remainder", numericBinOp rem),
-               ("string?", isString),
-               ("number?", isNumber),
-               ("symbol?", isSymbol),
-               ("symbol->string", symbolToString),
-               ("string->symbol", stringToSymbol)]
+               ("string?", totalUnOp isString),
+               ("number?", totalUnOp isNumber),
+               ("symbol?", totalUnOp isSymbol),
+               ("symbol->string", unOp symbolToString),
+               ("string->symbol", unOp stringToSymbol)]
 
-numericBinOp :: (Integer -> Integer -> Integer) -> [LispVal] -> LispVal
-numericBinOp op params = Number $ foldl1 op $ map unpackNum params
-  where
-    unpackNum :: LispVal -> Integer
-    unpackNum (Number n) = n
-    {-
-    unpackNum (String n) = let parsed = reads n :: [(Integer, String)] in
-                              if null parsed
-                                  then error "meh unpackNum String"
-                                  else fst $ parsed !! 0
-    unpackNum (List [n]) = unpackNum n
-    unpackNum _ = error "meh unpackNum _"
-    -}
+numericBinOp :: (Integer -> Integer -> Integer) -> [LispVal] -> ThrowsError LispVal
+numericBinOp op params@[_, _] = mapM unpackNum params >>= return . Number . foldl1 op
+    where unpackNum :: LispVal -> ThrowsError Integer
+          unpackNum   (Number n)  = return n
+          unpackNum s@(String s') = unpackParsedNum $ reads s'
+                 where unpackParsedNum [(n, _)] = return n
+                       unpackParsedNum _        = throwError $ TypeMismatch "number" s
+          unpackNum (List [n])    = unpackNum n -- maybe don't require singletons?
+          unpackNum notNum        = throwError $ TypeMismatch "number" notNum
+numericBinOp _  params        = throwError $ NumArgs 2 params
 
-isString :: [LispVal] -> LispVal
-isString [String _] = Bool True
+unOp :: (LispVal -> ThrowsError LispVal) -> [LispVal] -> ThrowsError LispVal
+unOp op [param] = op param
+unOp op params  = throwError $ NumArgs 1 params
+
+totalUnOp :: (LispVal -> LispVal) -> [LispVal] -> ThrowsError LispVal
+totalUnOp op = unOp (return . op)
+
+isString :: LispVal -> LispVal
+isString (String _) = Bool True
 isString _          = Bool False
 
-isNumber :: [LispVal] -> LispVal
-isNumber [Number _] = Bool True
+isNumber :: LispVal -> LispVal
+isNumber (Number _) = Bool True
 isNumber _          = Bool False
 
-isSymbol :: [LispVal] -> LispVal
-isSymbol [Atom _]                 = Bool True
-isSymbol _                        = Bool False
+isSymbol :: LispVal -> LispVal
+isSymbol (Atom _) = Bool True
+isSymbol _        = Bool False
 
-symbolToString :: [LispVal] -> LispVal
-symbolToString [Atom s] = String s
+symbolToString :: LispVal -> ThrowsError LispVal
+symbolToString (Atom a) = return $ String a
+symbolToString notAtom  = throwError $ TypeMismatch "atom" notAtom
 
-stringToSymbol :: [LispVal] -> LispVal
-stringToSymbol [String s] = Atom s
+stringToSymbol :: LispVal -> ThrowsError LispVal
+stringToSymbol (String s) = return $ Atom s
+stringToSymbol notString  = throwError $ TypeMismatch "string" notString
 
-apply :: String -> [LispVal] -> LispVal
-apply func args = maybe (error "meh apply") ($ args) $ lookup func primitives
+apply :: String -> [LispVal] -> ThrowsError LispVal
+apply func args = maybe (throwError $ NotFunction "Unrecognized primitive function" func)
+                        ($ args)
+                        (lookup func primitives)
 
-eval :: LispVal -> LispVal
-{-
-eval val@(String _) = val
-eval val@(Number _) = val
-eval val@(Bool   _) = val
--}
-eval (List (Atom "quote" : [val])) = val
-eval (List (Atom func    : args))  = apply func $ map eval args
-eval val = val
+eval :: LispVal -> ThrowsError LispVal
+eval val@(String _) = return val
+eval val@(Number _) = return val
+eval val@(Bool   _) = return val
+eval (List (Atom "quote" : [val])) = return val
+eval (List (Atom func    : args))  = mapM eval args >>= apply func

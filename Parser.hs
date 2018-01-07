@@ -1,7 +1,8 @@
 module Parser where
 
 import Control.Monad (liftM)
-import Data.List.Split (chunksOf)
+import Control.Monad.Error (throwError)
+import Data.List.Split (chunk)  -- chunksOf in newer versions of split
 import Data.Maybe (fromJust)
 import Text.ParserCombinators.Parsec
 
@@ -47,7 +48,7 @@ parseChar :: Parser LispVal
 parseChar = string "#\\" >> choice (zipWith replace codes replacements) >>= return . Char
   where
       replace code replacement = string code >> return replacement
-      codes        = [" ", "space", "newline", "(", ")"] ++ chunksOf 1 (['a'..'z'] ++ ['A'..'Z'])
+      codes        = [" ", "space", "newline", "(", ")"] ++ chunk 1 (['a'..'z'] ++ ['A'..'Z'])
       replacements = [' ', ' ', '\n', '(', ')'] ++ ['a'..'z'] ++ ['A'..'Z']
 
 parseString :: Parser LispVal
@@ -98,6 +99,6 @@ readExpr input = case parse parseExpr "lisp" input of
     Left  err -> "No match: " ++ show err
     Right val -> "Found value: " ++ show val
 -}
-readExpr :: String -> LispVal
-readExpr = either (\ err -> error $ show err) (\ val -> val)
+readExpr :: String -> ThrowsError LispVal
+readExpr = either (\ err -> throwError $ Parser err) return
          . parse parseExpr "lisp"
