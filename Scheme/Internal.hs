@@ -1,4 +1,4 @@
-module Internal where
+module Scheme.Internal where
 
 import Control.Monad.Error
 import Data.Foldable (Foldable, toList)

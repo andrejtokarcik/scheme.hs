@@ -1,0 +1,14 @@
+Name:                scheme
+Version:             0.1
+Build-type:          Simple
+Cabal-version:       >=1.2
+Extra-source-files:  README.md
+
+Executable scheme
+  Main-is:           Scheme/Main.hs
+  Build-depends:     base
+  Build-depends:     ghc
+  Build-depends:     mtl
+  Build-depends:     parsec
+  Build-depends:     semigroups
+  Build-depends:     split

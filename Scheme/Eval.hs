@@ -1,10 +1,10 @@
-module Eval where
+module Scheme.Eval where
 
 import Control.Monad.Error (throwError)
 
-import Eval.BinOp
-import Eval.UnOp
-import Internal
+import Scheme.Eval.BinOp
+import Scheme.Eval.UnOp
+import Scheme.Internal
 
 primitives :: [(String, [LispVal] -> ThrowsError LispVal)]
 primitives =  [("string?", isString),

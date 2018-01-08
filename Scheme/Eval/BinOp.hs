@@ -1,5 +1,5 @@
 -- | Evaluation of binary operations.
-module Eval.BinOp
+module Scheme.Eval.BinOp
     ( numNumBinOp
     , numBoolBinOp
     , boolBoolBinOp
@@ -12,7 +12,7 @@ module Eval.BinOp
 import Control.Monad.Error (throwError)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 
-import Internal
+import Scheme.Internal
 
 binOp :: (LispVal -> LispVal -> ThrowsError LispVal) -> [LispVal] -> ThrowsError LispVal
 binOp op [x, y] = x `op` y

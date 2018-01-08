@@ -1,4 +1,4 @@
-module Parser where
+module Scheme.Parser where
 
 import Control.Monad (liftM)
 import Control.Monad.Error (throwError)
@@ -7,7 +7,7 @@ import Data.Maybe (fromJust)
 import Text.ParserCombinators.Parsec
 import qualified Data.List.NonEmpty as NonEmpty
 
-import Internal
+import Scheme.Internal
 
 -----
 -- http://stackoverflow.com/questions/5921573/convert-a-string-representing-a-binary-number-to-a-base-10-string-haskell

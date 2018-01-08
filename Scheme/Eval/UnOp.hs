@@ -1,5 +1,5 @@
 -- | Evaluation of unary operations.
-module Eval.UnOp
+module Scheme.Eval.UnOp
     ( isString
     , isNumber
     , isSymbol
@@ -12,7 +12,7 @@ module Eval.UnOp
 import Data.List.NonEmpty (NonEmpty (..), nonEmpty)
 import Control.Monad.Error (throwError)
 
-import Internal
+import Scheme.Internal
 
 unOp :: (LispVal -> ThrowsError LispVal) -> [LispVal] -> ThrowsError LispVal
 unOp op [param] = op param

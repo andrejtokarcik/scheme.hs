@@ -2,9 +2,9 @@ import Control.Monad (liftM)
 import Control.Monad.Error (catchError)
 import System.Environment (getArgs)
 
-import Eval
-import Internal
-import Parser
+import Scheme.Eval
+import Scheme.Internal
+import Scheme.Parser
 
 main :: IO ()
 main = do getArgs >>= runWithArgs
