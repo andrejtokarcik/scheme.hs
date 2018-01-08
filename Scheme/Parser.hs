@@ -7,7 +7,7 @@ import Data.Maybe (fromJust)
 import Text.ParserCombinators.Parsec
 import qualified Data.List.NonEmpty as NonEmpty
 
-import Scheme.Internal
+import Scheme.Data
 
 -----
 -- http://stackoverflow.com/questions/5921573/convert-a-string-representing-a-binary-number-to-a-base-10-string-haskell

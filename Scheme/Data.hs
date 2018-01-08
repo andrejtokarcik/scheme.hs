@@ -1,4 +1,4 @@
-module Scheme.Internal where
+module Scheme.Data where
 
 import Control.Monad.Error
 import Data.Foldable (Foldable, toList)
@@ -13,6 +13,9 @@ data LispVal = Atom String
              | List [LispVal]
              | DottedList (NonEmpty LispVal) LispVal
     deriving Eq
+
+unwordsList :: (Foldable f) => f LispVal -> String
+unwordsList = unwords . map showVal . toList
 
 showVal :: LispVal -> String
 showVal (Atom name) = name
@@ -35,9 +38,6 @@ data LispError = NumArgs Integer [LispVal]
                | NotFunction String String
                | UnboundVar String String
                | Default String
-
-unwordsList :: (Foldable f) => f LispVal -> String
-unwordsList = unwords . map showVal . toList
 
 showError :: LispError -> String
 showError (UnboundVar message varname)  = message ++ ": " ++ varname

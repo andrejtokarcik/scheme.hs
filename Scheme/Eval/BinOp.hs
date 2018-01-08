@@ -12,7 +12,7 @@ module Scheme.Eval.BinOp
 import Control.Monad.Error (throwError)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 
-import Scheme.Internal
+import Scheme.Data
 
 binOp :: (LispVal -> LispVal -> ThrowsError LispVal) -> [LispVal] -> ThrowsError LispVal
 binOp op [x, y] = x `op` y

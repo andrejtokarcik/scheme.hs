@@ -1,11 +1,11 @@
 module Scheme
-    ( module Scheme.Internal  -- TODO rename to Data
+    ( module Scheme.Data
     , evalInput
     ) where
 
 import Control.Monad (liftM)
 import Scheme.Eval
-import Scheme.Internal
+import Scheme.Data
 import Scheme.Parser
 
 evalInput :: String -> ThrowsError String

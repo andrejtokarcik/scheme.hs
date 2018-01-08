@@ -12,7 +12,7 @@ module Scheme.Eval.UnOp
 import Data.List.NonEmpty (NonEmpty (..), nonEmpty)
 import Control.Monad.Error (throwError)
 
-import Scheme.Internal
+import Scheme.Data
 
 unOp :: (LispVal -> ThrowsError LispVal) -> [LispVal] -> ThrowsError LispVal
 unOp op [param] = op param
