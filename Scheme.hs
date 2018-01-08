@@ -4,8 +4,8 @@ module Scheme
     ) where
 
 import Control.Monad (liftM)
-import Scheme.Eval
 import Scheme.Data
+import Scheme.Eval
 import Scheme.Parser
 
 evalInput :: String -> ThrowsError String

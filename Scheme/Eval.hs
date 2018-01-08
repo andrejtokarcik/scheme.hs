@@ -1,9 +1,9 @@
 module Scheme.Eval where
 
 import Control.Monad.Error (throwError)
+import Scheme.Data
 import Scheme.Eval.BinOp
 import Scheme.Eval.UnOp
-import Scheme.Data
 
 primitives :: [(String, [LispVal] -> ThrowsError LispVal)]
 primitives =  [("string?", isString),
@@ -35,7 +35,8 @@ primitives =  [("string?", isString),
                ("cdr", cdr),
                ("cons", cons),
                ("eq?", eqv),
-               ("eqv?", eqv)
+               ("eqv?", eqv),
+               ("equal?", equal)
                ]
 
 apply :: String -> [LispVal] -> ThrowsError LispVal

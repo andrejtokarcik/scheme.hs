@@ -6,10 +6,10 @@ module Scheme.Eval.BinOp
     , strBoolBinOp
     , cons
     , eqv
+    , equal
     ) where
 
-
-import Control.Monad.Error (throwError)
+import Control.Monad.Error (catchError, throwError)
 import Data.List.NonEmpty (NonEmpty (..), (<|))
 
 import Scheme.Data
@@ -43,7 +43,7 @@ boolBoolBinOp :: (Bool -> Bool -> Bool) -> [LispVal] -> ThrowsError LispVal
 boolBoolBinOp = binOpOnAType unpackBool Bool
     where unpackBool :: LispVal -> ThrowsError Bool
           unpackBool (Bool b)   = return b
-          --unpackBool (List [b]) = unpackBool b
+          unpackBool (List [b]) = unpackBool b   -- maybe not supported by Scheme
           unpackBool notBool    = throwError $ TypeMismatch "boolean" notBool
 
 strBoolBinOp :: (String -> String -> Bool) -> [LispVal] -> ThrowsError LispVal
@@ -52,7 +52,7 @@ strBoolBinOp = binOpOnAType unpackStr Bool
           unpackStr (String s) = return s
           unpackStr (Number s) = return $ show s
           unpackStr (Bool s)   = return $ show s
-          --unpackStr (List [s]) = unpackStr s
+          unpackStr (List [s]) = unpackStr s     -- maybe not supported by Scheme; needed for equal'
           unpackStr notStr     = throwError $ TypeMismatch "string" notStr
 
 cons :: [LispVal] -> ThrowsError LispVal
@@ -63,4 +63,9 @@ cons = binOp $ (return.) . cons'
           cons' x y                     = DottedList (x :| []) y
 
 eqv :: [LispVal] -> ThrowsError LispVal
-eqv = binOp $ \x y -> return . Bool $ x == y
+eqv = binOp $ \x y -> return . Bool $ eqv' x y
+    where eqv' = (==)  -- HACK
+
+equal :: [LispVal] -> ThrowsError LispVal
+equal args = equal' args `catchError` const (return $ Bool False)
+    where equal' = strBoolBinOp (==)  -- HACK

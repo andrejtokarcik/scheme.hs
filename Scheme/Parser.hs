@@ -4,10 +4,9 @@ import Control.Monad (liftM)
 import Control.Monad.Error (throwError)
 import Data.List.Split (chunk)  -- chunksOf in newer versions of split
 import Data.Maybe (fromJust)
+import Scheme.Data
 import Text.ParserCombinators.Parsec
 import qualified Data.List.NonEmpty as NonEmpty
-
-import Scheme.Data
 
 -----
 -- http://stackoverflow.com/questions/5921573/convert-a-string-representing-a-binary-number-to-a-base-10-string-haskell
