@@ -5,10 +5,14 @@ Cabal-version:       >=1.2
 Extra-source-files:  README.md
 
 Executable scheme
-  Main-is:           Scheme/Main.hs
-  Build-depends:     base
-  Build-depends:     ghc
-  Build-depends:     mtl
-  Build-depends:     parsec
-  Build-depends:     semigroups
-  Build-depends:     split
+  Main-is:           Main.hs
+
+Library
+  Build-depends:     base,
+                     ghc,
+                     mtl,
+                     parsec,
+                     semigroups,
+                     split
+  Exposed-modules:   Scheme
+--  ghc-options:       -Wall
