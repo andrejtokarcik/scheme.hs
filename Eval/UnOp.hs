@@ -1,4 +1,5 @@
-module Eval.UnOp  -- TODO rename to UnaryOp?
+-- | Evaluation of unary operations.
+module Eval.UnOp
     ( isString
     , isNumber
     , isSymbol

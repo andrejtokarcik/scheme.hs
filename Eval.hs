@@ -12,8 +12,6 @@ primitives =  [("string?", isString),
                ("symbol?", isSymbol),
                ("symbol->string", symbolToString),
                ("string->symbol", stringToSymbol),
-               ("car", car),
-               ("cdr", cdr),
                ("+", numNumBinOp (+)),
                ("-", numNumBinOp (-)),
                ("*", numNumBinOp (*)),
@@ -33,7 +31,10 @@ primitives =  [("string?", isString),
                ("string<?", strBoolBinOp (<)),
                ("string>?", strBoolBinOp (>)),
                ("string<=?", strBoolBinOp (<=)),
-               ("string>=?", strBoolBinOp (>=))
+               ("string>=?", strBoolBinOp (>=)),
+               ("car", car),
+               ("cdr", cdr),
+               ("cons", cons)
                ]
 
 apply :: String -> [LispVal] -> ThrowsError LispVal
