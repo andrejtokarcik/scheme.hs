@@ -53,7 +53,8 @@ eval (List [Atom "quote", val]) = return val
 eval (List [Atom "if", cond, conseq, alt]) =
      do result <- eval cond
         case result of
+             Bool True  -> eval conseq
              Bool False -> eval alt
-             _          -> eval conseq
+             notBool    -> throwError $ TypeMismatch "boolean" notBool
 eval (List (Atom func : args)) = mapM eval args >>= apply func  -- implies strict evaluation strategy
 eval badForm = throwError $ BadSpecialForm "Unrecognized special form" badForm
