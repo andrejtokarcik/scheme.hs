@@ -5,6 +5,7 @@ module Eval.BinOp
     , boolBoolBinOp
     , strBoolBinOp
     , cons
+    , eqv
     ) where
 
 
@@ -60,3 +61,6 @@ cons = binOp $ (return.) . cons'
           cons' x (List y)              = List (x : y)
           cons' x (DottedList xs xlast) = DottedList (x <| xs) xlast
           cons' x y                     = DottedList (x :| []) y
+
+eqv :: [LispVal] -> ThrowsError LispVal
+eqv = binOp $ \x y -> return . Bool $ x == y

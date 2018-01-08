@@ -12,6 +12,7 @@ data LispVal = Atom String
              | String String
              | List [LispVal]
              | DottedList (NonEmpty LispVal) LispVal
+    deriving Eq
 
 showVal :: LispVal -> String
 showVal (Atom name) = name

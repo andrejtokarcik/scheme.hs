@@ -34,7 +34,9 @@ primitives =  [("string?", isString),
                ("string>=?", strBoolBinOp (>=)),
                ("car", car),
                ("cdr", cdr),
-               ("cons", cons)
+               ("cons", cons),
+               ("eq?", eqv),
+               ("eqv?", eqv)
                ]
 
 apply :: String -> [LispVal] -> ThrowsError LispVal
