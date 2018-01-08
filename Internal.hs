@@ -20,6 +20,7 @@ showVal (Bool False) = "#f"
 showVal (Number contents) = show contents
 showVal (Char char) = "#\\" ++ [char]
 showVal (String contents) = "\"" ++ contents ++ "\""
+showVal (List []) = "NIL"
 showVal (List contents) = "(" ++ unwordsList contents ++ ")"
 showVal (DottedList head tail) = "(" ++ unwordsList head ++ " . " ++ showVal tail ++ ")"
 

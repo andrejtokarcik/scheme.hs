@@ -46,11 +46,11 @@ eval :: LispVal -> ThrowsError LispVal
 eval val@(String _) = return val
 eval val@(Number _) = return val
 eval val@(Bool   _) = return val
-eval (List [Atom "quote", val]) = return val   -- TODO as common function?
-eval (List [Atom "if", cond, conseq, alt]) =   -- TODO as common function?
+eval (List [Atom "quote", val]) = return val
+eval (List [Atom "if", cond, conseq, alt]) =
      do result <- eval cond
         case result of
              Bool False -> eval alt
              _          -> eval conseq
-eval (List (Atom func : args)) = mapM eval args >>= apply func
+eval (List (Atom func : args)) = mapM eval args >>= apply func  -- implies strict evaluation strategy
 eval badForm = throwError $ BadSpecialForm "Unrecognized special form" badForm
