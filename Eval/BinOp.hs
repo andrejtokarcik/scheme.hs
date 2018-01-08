@@ -57,7 +57,7 @@ strBoolBinOp = binOpOnAType unpackStr Bool
 
 cons :: [LispVal] -> ThrowsError LispVal
 cons = binOp $ (return.) . cons'
-    where cons' (List x) (List y)       = List (x ++ y)
+    where cons' x (List [])             = List [x]
           cons' x (List y)              = List (x : y)
           cons' x (DottedList xs xlast) = DottedList (x <| xs) xlast
           cons' x y                     = DottedList (x :| []) y
