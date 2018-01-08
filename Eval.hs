@@ -13,6 +13,7 @@ primitives =  [("string?", isString),
                ("symbol->string", symbolToString),
                ("string->symbol", stringToSymbol),
                ("car", car),
+               ("cdr", cdr),
                ("+", numNumBinOp (+)),
                ("-", numNumBinOp (-)),
                ("*", numNumBinOp (*)),
@@ -46,8 +47,8 @@ eval val@(String _) = return val
 eval val@(Number _) = return val
 eval val@(Bool   _) = return val
 eval (List [Atom "quote", val]) = return val   -- TODO as common function?
-eval (List [Atom "if", pred, conseq, alt]) =   -- TODO as common function?
-     do result <- eval pred
+eval (List [Atom "if", cond, conseq, alt]) =   -- TODO as common function?
+     do result <- eval cond
         case result of
              Bool False -> eval alt
              _          -> eval conseq

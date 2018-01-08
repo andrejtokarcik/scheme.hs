@@ -5,6 +5,7 @@ import Control.Monad.Error (throwError)
 import Data.List.Split (chunk)  -- chunksOf in newer versions of split
 import Data.Maybe (fromJust)
 import Text.ParserCombinators.Parsec
+import qualified Data.List.NonEmpty as NonEmpty
 
 import Internal
 
@@ -79,7 +80,7 @@ parseDottedList :: Parser LispVal
 parseDottedList = do
     head <- parseExpr `endBy` spaces
     tail <- char '.' >> spaces >> parseExpr
-    return $ DottedList head tail
+    return $ DottedList (NonEmpty.fromList head) tail
 
 parseExpr :: Parser LispVal
 parseExpr =  try parseAtom

@@ -1,6 +1,8 @@
 module Internal where
 
 import Control.Monad.Error
+import Data.Foldable (Foldable, toList)
+import Data.List.NonEmpty (NonEmpty)
 import Text.ParserCombinators.Parsec (ParseError)
 
 data LispVal = Atom String
@@ -9,19 +11,17 @@ data LispVal = Atom String
              | Char Char
              | String String
              | List [LispVal]
-             | DottedList [LispVal] LispVal
+             | DottedList (NonEmpty LispVal) LispVal
 
 showVal :: LispVal -> String
-showVal (String contents) = "\"" ++ contents ++ "\""
 showVal (Atom name) = name
-showVal (Number contents) = show contents
 showVal (Bool True) = "#t"
 showVal (Bool False) = "#f"
+showVal (Number contents) = show contents
+showVal (Char char) = "#\\" ++ [char]
+showVal (String contents) = "\"" ++ contents ++ "\""
 showVal (List contents) = "(" ++ unwordsList contents ++ ")"
 showVal (DottedList head tail) = "(" ++ unwordsList head ++ " . " ++ showVal tail ++ ")"
-
-unwordsList :: [LispVal] -> String
-unwordsList = unwords . map showVal
 
 instance Show LispVal where
     show = showVal
@@ -34,6 +34,9 @@ data LispError = NumArgs Integer [LispVal]
                | UnboundVar String String
                | Default String
 
+unwordsList :: (Foldable f) => f LispVal -> String
+unwordsList = unwords . map showVal . toList
+
 showError :: LispError -> String
 showError (UnboundVar message varname)  = message ++ ": " ++ varname
 showError (BadSpecialForm message form) = message ++ ": " ++ show form
@@ -43,12 +46,13 @@ showError (NumArgs expected found)      = "Expected " ++ show expected
 showError (TypeMismatch expected found) = "Invalid type: expected " ++ expected
                                        ++ ", found " ++ show found
 showError (Parser parseErr)             = "Parse error at " ++ show parseErr
+showError (Default message)             = "(" ++ message ++ ")"
 
 instance Show LispError where
     show = showError
 
 instance Error LispError where
-    noMsg = Default "(a LispError without message)"
+    noMsg = Default "a LispError without message"
     strMsg = Default
 
 -- TODO don't require precisely ThrowsError, generalise parameters to the MonadError class

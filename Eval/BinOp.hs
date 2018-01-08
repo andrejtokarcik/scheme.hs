@@ -13,7 +13,7 @@ binOp :: (LispVal -> ThrowsError a) -> (b -> LispVal) -> (a -> a -> b) -> [LispV
 binOp unpack pack op [x, y] = do x' <- unpack x
                                  y' <- unpack y
                                  return . pack $ x' `op` y'
-binOp unpack pack _  params = throwError $ NumArgs 2 params
+binOp _      _    _  params = throwError $ NumArgs 2 params
 
 binOpOnNums :: (b -> LispVal) -> (Integer -> Integer -> b) -> [LispVal] -> ThrowsError LispVal
 binOpOnNums = binOp unpackNum
