@@ -3,7 +3,7 @@ import Scheme
 import System.Environment (getArgs)
 
 main :: IO ()
-main = do getArgs >>= runWithArgs
+main = getArgs >>= runWithArgs
   where runWithArgs [arg] = putStrLn . extractValue . trapError . evalInput $ arg
         runWithArgs _     = showHelp
 

@@ -55,7 +55,7 @@ parseChar = string "#\\" >> Char <$> choice (zipWith replace codes replacements)
 parseString :: Parser LispVal
 parseString = do
                 char '"'
-                x <- many $ stringElem
+                x <- many stringElem
                 char '"'
                 return $ String x
   where
@@ -95,5 +95,5 @@ parseExpr =  try parseAtom
                 return x
 
 readExpr :: String -> ThrowsError LispVal
-readExpr = either (\ err -> throwError $ Parser err) return
+readExpr = either (throwError . Parser) return
          . parse parseExpr "lisp"

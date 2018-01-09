@@ -73,11 +73,11 @@ equal xs = binOp equal' xs <|> return (Bool False)
           equal' (List xs) (List ys) = if length xs /= length ys
                                         then return (Bool False)
                                         else collectBool <$> mapM (uncurry equal') (zip xs ys)
-          equal' (DottedList xs x) (DottedList ys y) = equal' (List $ (toList xs) ++ [x])
-                                                              (List $ (toList ys) ++ [y])
+          equal' (DottedList xs x) (DottedList ys y) = equal' (List $ toList xs ++ [x])
+                                                              (List $ toList ys ++ [y])
           equal' x y = let xs = [x,y] in strBoolBinOp (==) xs <|> eqv xs
 
           collectBool :: [LispVal] -> LispVal  -- partial
-          collectBool = Bool . (all $ \(Bool b) -> b)
+          collectBool = Bool . all (\(Bool b) -> b)
 
           a <|> e = a `catchError` const e  -- as though Alternative for Either?
