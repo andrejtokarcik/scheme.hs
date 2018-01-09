@@ -9,8 +9,9 @@ module Scheme.Eval.BinOp
     , equal
     ) where
 
+import Control.Applicative ((<$>))
 import Control.Monad.Error (catchError, throwError)
-import Data.List.NonEmpty (NonEmpty (..), (<|))
+import Data.List.NonEmpty (NonEmpty (..), (<|), toList)
 
 import Scheme.Data
 
@@ -43,7 +44,7 @@ boolBoolBinOp :: (Bool -> Bool -> Bool) -> [LispVal] -> ThrowsError LispVal
 boolBoolBinOp = binOpOnAType unpackBool Bool
     where unpackBool :: LispVal -> ThrowsError Bool
           unpackBool (Bool b)   = return b
-          unpackBool (List [b]) = unpackBool b   -- maybe not supported by Scheme
+          --unpackBool (List [b]) = unpackBool b   -- not supported by Scheme?
           unpackBool notBool    = throwError $ TypeMismatch "boolean" notBool
 
 strBoolBinOp :: (String -> String -> Bool) -> [LispVal] -> ThrowsError LispVal
@@ -52,7 +53,7 @@ strBoolBinOp = binOpOnAType unpackStr Bool
           unpackStr (String s) = return s
           unpackStr (Number s) = return $ show s
           unpackStr (Bool s)   = return $ show s
-          unpackStr (List [s]) = unpackStr s     -- maybe not supported by Scheme; needed for equal'
+          --unpackStr (List [s]) = unpackStr s     -- not supported by Scheme?
           unpackStr notStr     = throwError $ TypeMismatch "string" notStr
 
 cons :: [LispVal] -> ThrowsError LispVal
@@ -64,8 +65,19 @@ cons = binOp $ (return.) . cons'
 
 eqv :: [LispVal] -> ThrowsError LispVal
 eqv = binOp $ \x y -> return . Bool $ eqv' x y
-    where eqv' = (==)  -- HACK
+    where eqv' x y = show x == show y  -- HACK
 
 equal :: [LispVal] -> ThrowsError LispVal
-equal args = equal' args `catchError` const (return $ Bool False)
-    where equal' = strBoolBinOp (==)  -- HACK
+equal xs = binOp equal' xs <|> return (Bool False)
+    where equal' :: LispVal -> LispVal -> ThrowsError LispVal  -- HACK
+          equal' (List xs) (List ys) = if length xs /= length ys
+                                        then return (Bool False)
+                                        else collectBool <$> mapM (uncurry equal') (zip xs ys)
+          equal' (DottedList xs x) (DottedList ys y) = equal' (List $ (toList xs) ++ [x])
+                                                              (List $ (toList ys) ++ [y])
+          equal' x y = let xs = [x,y] in strBoolBinOp (==) xs <|> eqv xs
+
+          collectBool :: [LispVal] -> LispVal  -- partial
+          collectBool = Bool . (all $ \(Bool b) -> b)
+
+          a <|> e = a `catchError` const e  -- as though Alternative for Either?
