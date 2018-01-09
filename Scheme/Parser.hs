@@ -1,5 +1,6 @@
 module Scheme.Parser where
 
+import Control.Applicative ((<$>))
 import Control.Monad (liftM)
 import Control.Monad.Error (throwError)
 import Data.List.Split (chunk)  -- chunksOf in newer versions of split
@@ -36,16 +37,16 @@ parseNumber :: Parser LispVal
 parseNumber = liftM Number $ (char '#' >> (bin <|> oct <|> hex <|> dec)) <|> noPrefix
   where
       bin = char 'b' >>
-            many1 (oneOf ['0', '1']) >>= return . fromJust . readBin
+            fromJust . readBin <$> many1 (oneOf ['0', '1'])
       oct = char 'o' >>
-            many1 (oneOf ['0'..'7']) >>= return . read . ("0o"++)
+            read . ("0o"++) <$> many1 (oneOf ['0'..'7'])
       hex = char 'x' >>
-            many1 (digit <|> oneOf (['a'..'f'] ++ ['A'..'F'])) >>= return . read . ("0x"++)
+            read . ("0x"++) <$> many1 (digit <|> oneOf (['a'..'f'] ++ ['A'..'F']))
       dec = char 'd' >> noPrefix
-      noPrefix = many1 digit >>= return . read
+      noPrefix = read <$> many1 digit
 
 parseChar :: Parser LispVal
-parseChar = string "#\\" >> choice (zipWith replace codes replacements) >>= return . Char
+parseChar = string "#\\" >> Char <$> choice (zipWith replace codes replacements)
   where
       replace code replacement = string code >> return replacement
       codes        = [" ", "space", "newline", "(", ")"] ++ chunk 1 (['a'..'z'] ++ ['A'..'Z'])
