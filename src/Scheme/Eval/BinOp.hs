@@ -10,7 +10,7 @@ module Scheme.Eval.BinOp
     ) where
 
 import Control.Applicative ((<$>))
-import Control.Monad.Error (catchError, throwError)
+import Control.Monad.Except (catchError, throwError)
 import Data.List.NonEmpty (NonEmpty (..), (<|), toList)
 
 import Scheme.Data
@@ -68,7 +68,7 @@ eqv = binOp $ \x y -> return . Bool $ eqv' x y
     where eqv' x y = show x == show y  -- HACK
 
 equal :: [LispVal] -> ThrowsError LispVal
-equal xs = binOp equal' xs <|> return (Bool False)
+equal args = binOp equal' args <|> return (Bool False)
     where equal' :: LispVal -> LispVal -> ThrowsError LispVal  -- HACK
           equal' (List xs) (List ys) = if length xs /= length ys
                                         then return (Bool False)

@@ -1,6 +1,6 @@
 module Scheme.Eval where
 
-import Control.Monad.Error (throwError)
+import Control.Monad.Except (throwError)
 import Scheme.Data
 import Scheme.Eval.BinOp
 import Scheme.Eval.UnOp

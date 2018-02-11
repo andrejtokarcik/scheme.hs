@@ -1,6 +1,5 @@
 module Scheme.Data where
 
-import Control.Monad.Error
 import Data.Foldable (Foldable, toList)
 import Data.List.NonEmpty (NonEmpty)
 import Text.ParserCombinators.Parsec (ParseError)
@@ -25,7 +24,7 @@ showVal (Number contents) = show contents
 showVal (Char char) = "#\\" ++ [char]
 showVal (String contents) = "\"" ++ contents ++ "\""
 showVal (List contents) = "(" ++ unwordsList contents ++ ")"
-showVal (DottedList head tail) = "(" ++ unwordsList head ++ " . " ++ showVal tail ++ ")"
+showVal (DottedList first rest) = "(" ++ unwordsList first ++ " . " ++ showVal rest ++ ")"
 
 instance Show LispVal where
     show = showVal
@@ -51,10 +50,6 @@ showError (Default message)             = "(" ++ message ++ ")"
 
 instance Show LispError where
     show = showError
-
-instance Error LispError where
-    noMsg = Default "a LispError without message"
-    strMsg = Default
 
 -- TODO don't require precisely ThrowsError, generalise parameters to the MonadError class
 -- + https://www.fpcomplete.com/blog/2016/11/exceptions-best-practices-haskell

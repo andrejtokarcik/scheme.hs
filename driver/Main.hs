@@ -1,4 +1,4 @@
-import Control.Monad.Error (catchError)
+import Control.Monad.Except (catchError)
 import Scheme
 import System.Environment (getArgs)
 

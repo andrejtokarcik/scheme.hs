@@ -2,7 +2,7 @@ module Scheme.Parser where
 
 import Control.Applicative ((<$>))
 import Control.Monad (liftM)
-import Control.Monad.Error (throwError)
+import Control.Monad.Except (throwError)
 import Data.List.Split (chunksOf)
 import Data.Maybe (fromJust)
 import Scheme.Data
@@ -20,10 +20,9 @@ readBin = fmap fst . listToMaybe . readInt 2 (`elem` "01") digitToInt
 -----
 
 parseAtom :: Parser LispVal
-parseAtom = do
-              first <- letter <|> symbol
-              rest <- many (letter <|> digit <|> symbol <|> char '#')
-              return . Atom $ first : rest
+parseAtom = do first <- letter <|> symbol
+               rest <- many (letter <|> digit <|> symbol <|> char '#')
+               return . Atom $ first : rest
   where
       symbol :: Parser Char
       symbol = oneOf "!$%&|*+-/:<=>?@^_~"
@@ -53,14 +52,13 @@ parseChar = string "#\\" >> Char <$> choice (zipWith replace codes replacements)
       replacements = [' ', ' ', '\n', '(', ')'] ++ ['a'..'z'] ++ ['A'..'Z']
 
 parseString :: Parser LispVal
-parseString = do
-                char '"'
-                x <- many stringElem
-                char '"'
-                return $ String x
+parseString = do _ <- char '"'  -- DO_NOT_COMMIT FIXME
+                 x <- many stringElem
+                 _ <- char '"'
+                 return $ String x
   where
       stringElem :: Parser Char
-      stringElem =  (char '\\' >> choice (zipWith replace codes replacements))
+      stringElem = (char '\\' >> choice (zipWith replace codes replacements))
                 <|> noneOf ['"']
       -- http://codereview.stackexchange.com/questions/2406/parsing-strings-with-escaped-characters-using-parsec
       replace code replacement = char code >> return replacement
@@ -69,7 +67,7 @@ parseString = do
 
 parseQuoted :: Parser LispVal
 parseQuoted = do
-    char '\''
+    _ <- char '\''
     x <- parseExpr
     return $ List [Atom "quote", x]
 
@@ -78,9 +76,9 @@ parseList = liftM List (parseExpr `sepBy` spaces)
 
 parseDottedList :: Parser LispVal
 parseDottedList = do
-    head <- parseExpr `endBy` spaces
-    tail <- char '.' >> spaces >> parseExpr
-    return $ DottedList (NonEmpty.fromList head) tail
+    first <- parseExpr `endBy` spaces
+    rest <- char '.' >> spaces >> parseExpr
+    return $ DottedList (NonEmpty.fromList first) rest
 
 parseExpr :: Parser LispVal
 parseExpr =  try parseAtom
@@ -89,9 +87,9 @@ parseExpr =  try parseAtom
          <|> try parseChar
          <|> try parseString
          <|> try parseQuoted
-         <|> do char '('
+         <|> do _ <- char '('
                 x <- try parseList <|> parseDottedList
-                char ')'
+                _ <- char ')'
                 return x
 
 readExpr :: String -> ThrowsError LispVal
