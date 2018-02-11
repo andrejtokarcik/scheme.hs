@@ -1,0 +1,27 @@
+name: scheme
+github: andrejtokarcik/scheme.hs
+extra-source-files:
+  - README.md
+
+ghc-options: -Wall
+
+default-extensions:
+  - FlexibleContexts
+
+dependencies:
+  - base ==4.*
+  - mtl
+  - parsec
+  - semigroups
+  - split
+
+library:
+  source-dirs: src
+  exposed-modules:
+    - Scheme
+
+executable:
+  main: Main.hs
+  source-dirs: driver
+  dependencies:
+    - scheme

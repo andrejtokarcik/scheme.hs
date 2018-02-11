@@ -3,7 +3,7 @@ module Scheme.Parser where
 import Control.Applicative ((<$>))
 import Control.Monad (liftM)
 import Control.Monad.Error (throwError)
-import Data.List.Split (chunk)  -- chunksOf in newer versions of split
+import Data.List.Split (chunksOf)
 import Data.Maybe (fromJust)
 import Scheme.Data
 import Text.ParserCombinators.Parsec
@@ -49,7 +49,7 @@ parseChar :: Parser LispVal
 parseChar = string "#\\" >> Char <$> choice (zipWith replace codes replacements)
   where
       replace code replacement = string code >> return replacement
-      codes        = [" ", "space", "newline", "(", ")"] ++ chunk 1 (['a'..'z'] ++ ['A'..'Z'])
+      codes        = [" ", "space", "newline", "(", ")"] ++ chunksOf 1 (['a'..'z'] ++ ['A'..'Z'])
       replacements = [' ', ' ', '\n', '(', ')'] ++ ['a'..'z'] ++ ['A'..'Z']
 
 parseString :: Parser LispVal

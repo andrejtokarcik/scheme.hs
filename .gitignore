@@ -1,4 +1,2 @@
-.*.swp
-*.hi
-*.o
-dist
+dist/
+.stack-work/
