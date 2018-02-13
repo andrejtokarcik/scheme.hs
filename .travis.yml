@@ -1,0 +1,11 @@
+language: haskell
+ghc:
+  - 8.2.2
+  - 8.0.2
+
+sudo: false
+cache:
+  directories:
+  - $HOME/.ghc
+  - $HOME/.cabal
+  - $HOME/.stack
