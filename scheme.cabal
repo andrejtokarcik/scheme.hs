@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 86db2fc35963c67e847a4d45f9521dfc651406cf90ca7b9ff8f4f187e567db50
+-- hash: a65ecd5e4247556743040ac8719ed6dd217f518026058504837693a04394a460
 
 name:           scheme
 version:        0.0.0
@@ -21,7 +21,7 @@ source-repository head
 library
   hs-source-dirs:
       src
-  default-extensions: FlexibleContexts
+  default-extensions: FlexibleContexts UnicodeSyntax
   ghc-options: -Wall
   build-depends:
       base ==4.*
@@ -44,7 +44,7 @@ executable scheme
   main-is: Main.hs
   hs-source-dirs:
       driver
-  default-extensions: FlexibleContexts
+  default-extensions: FlexibleContexts UnicodeSyntax
   ghc-options: -Wall
   build-depends:
       base ==4.*
@@ -54,5 +54,31 @@ executable scheme
     , semigroups
     , split
   other-modules:
+      Paths_scheme
+  default-language: Haskell2010
+
+test-suite spec
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  hs-source-dirs:
+      test
+      src
+  default-extensions: FlexibleContexts UnicodeSyntax
+  ghc-options: -Wall
+  build-depends:
+      base ==4.*
+    , hspec ==2.*
+    , mtl
+    , parsec
+    , semigroups
+    , split
+  other-modules:
+      ParserSpec
+      Scheme
+      Scheme.Data
+      Scheme.Eval
+      Scheme.Eval.BinOp
+      Scheme.Eval.UnOp
+      Scheme.Parser
       Paths_scheme
   default-language: Haskell2010

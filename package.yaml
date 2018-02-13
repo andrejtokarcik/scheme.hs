@@ -7,6 +7,7 @@ ghc-options: -Wall
 
 default-extensions:
   - FlexibleContexts
+  - UnicodeSyntax
 
 dependencies:
   - base ==4.*
@@ -25,3 +26,12 @@ executable:
   source-dirs: driver
   dependencies:
     - scheme
+
+tests:
+  spec:
+    main: Spec.hs
+    source-dirs:
+      - test
+      - src
+    dependencies:
+      - hspec == 2.*
