@@ -1,19 +1,19 @@
 module Scheme.Parser where
 
-import Control.Applicative ((<$>))
-import Control.Monad (liftM)
-import Control.Monad.Except (throwError)
-import Data.List.Split (chunksOf)
-import Data.Maybe (fromJust)
-import Scheme.Data
-import Text.ParserCombinators.Parsec
-import qualified Data.List.NonEmpty as NonEmpty
+import           Control.Applicative           ((<$>))
+import           Control.Monad                 (liftM)
+import           Control.Monad.Except          (throwError)
+import qualified Data.List.NonEmpty            as NonEmpty
+import           Data.List.Split               (chunksOf)
+import           Data.Maybe                    (fromJust)
+import           Scheme.Data
+import           Text.ParserCombinators.Parsec
 
 -----
 -- http://stackoverflow.com/questions/5921573/convert-a-string-representing-a-binary-number-to-a-base-10-string-haskell
-import Data.Char  (digitToInt)
-import Data.Maybe (listToMaybe)
-import Numeric    (readInt)
+import           Data.Char                     (digitToInt)
+import           Data.Maybe                    (listToMaybe)
+import           Numeric                       (readInt)
 
 readBin :: Integral a => String -> Maybe a
 readBin = fmap fst . listToMaybe . readInt 2 (`elem` "01") digitToInt
@@ -52,7 +52,7 @@ parseChar = string "#\\" >> Char <$> choice (zipWith replace codes replacements)
       replacements = [' ', ' ', '\n', '(', ')'] ++ ['a'..'z'] ++ ['A'..'Z']
 
 parseString :: Parser LispVal
-parseString = do _ <- char '"'  -- DO_NOT_COMMIT FIXME
+parseString = do _ <- char '"'
                  x <- many stringElem
                  _ <- char '"'
                  return $ String x

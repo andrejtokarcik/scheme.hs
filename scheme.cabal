@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a65ecd5e4247556743040ac8719ed6dd217f518026058504837693a04394a460
+-- hash: bd91e478076666b32dfeac85fad33b3bda9da002ac13799a61b77fd76afabecd
 
 name:           scheme
 version:        0.0.0
@@ -66,7 +66,8 @@ test-suite spec
   default-extensions: FlexibleContexts UnicodeSyntax
   ghc-options: -Wall
   build-depends:
-      base ==4.*
+      QuickCheck
+    , base ==4.*
     , hspec ==2.*
     , mtl
     , parsec

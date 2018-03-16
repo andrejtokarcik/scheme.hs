@@ -10,7 +10,7 @@ default-extensions:
   - UnicodeSyntax
 
 dependencies:
-  - base ==4.*
+  - base == 4.*
   - mtl
   - parsec
   - semigroups
@@ -35,3 +35,4 @@ tests:
       - src
     dependencies:
       - hspec == 2.*
+      - QuickCheck
