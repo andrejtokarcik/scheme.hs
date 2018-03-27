@@ -9,11 +9,11 @@ module Scheme.Eval.BinOp
     , equal
     ) where
 
-import Control.Applicative ((<$>))
-import Control.Monad.Except (catchError, throwError)
-import Data.List.NonEmpty (NonEmpty (..), (<|), toList)
+import           Control.Applicative  ((<$>))
+import           Control.Monad.Except (catchError, throwError)
+import           Data.List.NonEmpty   (NonEmpty (..), toList, (<|))
 
-import Scheme.Data
+import           Scheme.Data
 
 binOp :: (LispVal -> LispVal -> ThrowsError LispVal) -> [LispVal] -> ThrowsError LispVal
 binOp op [x, y] = x `op` y
@@ -43,9 +43,9 @@ numBoolBinOp = binOpOnNums Bool
 boolBoolBinOp :: (Bool -> Bool -> Bool) -> [LispVal] -> ThrowsError LispVal
 boolBoolBinOp = binOpOnAType unpackBool Bool
     where unpackBool :: LispVal -> ThrowsError Bool
-          unpackBool (Bool b)   = return b
+          unpackBool (Bool b) = return b
           --unpackBool (List [b]) = unpackBool b   -- not supported by Scheme?
-          unpackBool notBool    = throwError $ TypeMismatch "boolean" notBool
+          unpackBool notBool  = throwError $ TypeMismatch "boolean" notBool
 
 strBoolBinOp :: (String -> String -> Bool) -> [LispVal] -> ThrowsError LispVal
 strBoolBinOp = binOpOnAType unpackStr Bool

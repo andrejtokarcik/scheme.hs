@@ -3,17 +3,15 @@ module Scheme.Parser where
 import           Control.Applicative           ((<$>))
 import           Control.Monad                 (liftM)
 import           Control.Monad.Except          (throwError)
+import           Data.Char                     (digitToInt)
 import qualified Data.List.NonEmpty            as NonEmpty
 import           Data.List.Split               (chunksOf)
 import           Data.Maybe                    (fromJust)
-import           Scheme.Data
-import           Text.ParserCombinators.Parsec
-
------
--- http://stackoverflow.com/questions/5921573/convert-a-string-representing-a-binary-number-to-a-base-10-string-haskell
-import           Data.Char                     (digitToInt)
 import           Data.Maybe                    (listToMaybe)
 import           Numeric                       (readInt)
+import           Text.ParserCombinators.Parsec
+
+import           Scheme.Data
 
 readBin :: Integral a => String -> Maybe a
 readBin = fmap fst . listToMaybe . readInt 2 (`elem` "01") digitToInt

@@ -1,6 +1,7 @@
-import Control.Monad.Except (catchError)
-import Scheme
-import System.Environment (getArgs)
+import           Control.Monad.Except (catchError)
+import           System.Environment   (getArgs)
+
+import           Scheme
 
 main :: IO ()
 main = getArgs >>= runWithArgs
@@ -12,7 +13,7 @@ trapError action = catchError action (return . show)
 
 extractValue :: ThrowsError a -> a
 extractValue (Right val) = val
-extractValue (Left _) = error "Call just after trapError"
+extractValue (Left _)    = error "Call just after trapError"
 
 showHelp :: IO ()
 showHelp = putStrLn "Run with a LISP expression as an argument"

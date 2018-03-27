@@ -9,10 +9,10 @@ module Scheme.Eval.UnOp
     , cdr
     ) where
 
-import Data.List.NonEmpty (NonEmpty (..), nonEmpty)
-import Control.Monad.Except (throwError)
+import           Control.Monad.Except (throwError)
+import           Data.List.NonEmpty   (NonEmpty (..), nonEmpty)
 
-import Scheme.Data
+import           Scheme.Data
 
 unOp :: (LispVal -> ThrowsError LispVal) -> [LispVal] -> ThrowsError LispVal
 unOp op [param] = op param
