@@ -1,6 +1,7 @@
 module ParserSpec (spec) where
 
 import           Data.Char
+import           Data.Foldable   (sequenceA_)
 import           Data.Maybe
 import           Numeric         (readHex, readOct)
 import           Test.Hspec
@@ -37,12 +38,19 @@ spec =
         readExpr ("\"" ++ s ++ "\"") === Right (String s)
 
     it "parses string with all escape sequences" $ do
-      let stringWithEscapes = "\n\r\t\\\"" in
-        readExpr (show stringWithEscapes) `shouldBe` Right (String stringWithEscapes)
+      let stringWithEscapes = "\n\r\t\\\""
+      readExpr (show stringWithEscapes) `shouldBe` Right (String stringWithEscapes)
 
     it "parses any atom identifier" $ property $
-      forAll atomId $ \ s →
-        readExpr s === Right (Atom s)
+      forAll atomId $ \ s → readExpr s === Right (Atom s)
+
+    it "parses any character literal" $ property $
+      forAll arbitraryPrintableChar $ \ c → readExpr ("#\\" ++ [c]) === Right (Char c)
+
+    it "parses character names" $ do
+      let checkParse (name, char) = readExpr ("#\\" ++ name) `shouldBe` Right (Char char)
+      sequenceA_ $ map checkParse
+        [("space", ' '), ("SPACE", ' '), ("newline", '\n'), ("NEWLINE", '\n')]
 
 stringWithoutEscapes ∷ Gen String
 stringWithoutEscapes = arbitrary `suchThat` (all (`notElem` ['\\', '"']))

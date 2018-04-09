@@ -1,11 +1,9 @@
 module Scheme.Parser where
 
 import           Control.Applicative           ((<$>))
-import           Control.Monad                 (liftM)
 import           Control.Monad.Except          (throwError)
-import           Data.Char                     (digitToInt)
+import           Data.Char                     (digitToInt, toLower, toUpper)
 import qualified Data.List.NonEmpty            as NonEmpty
-import           Data.List.Split               (chunksOf)
 import           Data.Maybe                    (fromJust)
 import           Data.Maybe                    (listToMaybe)
 import           Numeric                       (readInt)
@@ -31,7 +29,7 @@ parseBool = char '#' >>
          <|> (char 'f' >> return (Bool False)))
 
 parseNumber :: Parser LispVal
-parseNumber = liftM Number $ (char '#' >> (bin <|> oct <|> hex <|> dec)) <|> noPrefix
+parseNumber = fmap Number $ (char '#' >> (bin <|> oct <|> hex <|> dec)) <|> noPrefix
   where
       bin = char 'b' >>
             fromJust . readBin <$> many1 (oneOf ['0', '1'])
@@ -43,11 +41,15 @@ parseNumber = liftM Number $ (char '#' >> (bin <|> oct <|> hex <|> dec)) <|> noP
       noPrefix = read <$> many1 digit
 
 parseChar :: Parser LispVal
-parseChar = string "#\\" >> Char <$> choice (zipWith replace codes replacements)
+parseChar = string "#\\" >>
+            Char <$> (choice (zipWith replace codes replacements) <|> anyChar)
   where
-      replace code replacement = string code >> return replacement
-      codes        = [" ", "space", "newline", "(", ")"] ++ chunksOf 1 (['a'..'z'] ++ ['A'..'Z'])
-      replacements = [' ', ' ', '\n', '(', ')'] ++ ['a'..'z'] ++ ['A'..'Z']
+      replace code replacement = caseInsensitiveString code >> return replacement
+      codes        = ["space", "newline"]
+      replacements = [' ', '\n']
+      -- https://stackoverflow.com/questions/12937325/whats-the-cleanest-way-to-do-case-insensitive-parsing-with-text-combinators-par
+      caseInsensitiveChar c   = char (toLower c) <|> char (toUpper c)
+      caseInsensitiveString s = try (mapM caseInsensitiveChar s) <?> "\"" ++ s ++ "\""
 
 parseString :: Parser LispVal
 parseString = do _ <- char '"'
@@ -70,7 +72,7 @@ parseQuoted = do
     return $ List [Atom "quote", x]
 
 parseList :: Parser LispVal
-parseList = liftM List (parseExpr `sepBy` spaces)
+parseList = fmap List $ parseExpr `sepBy` spaces
 
 parseDottedList :: Parser LispVal
 parseDottedList = do
