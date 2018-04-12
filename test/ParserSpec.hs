@@ -53,17 +53,28 @@ spec =
         [("space", ' '), ("SPACE", ' '), ("newline", '\n'), ("NEWLINE", '\n')]
 
     it "parses any parenthesized list of atoms" $ do
-      forAll parenthesizedList $ \ s →
-        counterList s $ case readExpr s of { Right (List _) → True ; _ → False }
+      forAll parenthesizedList $ \ s → reportList s $
+        case readExpr s of
+          Right (List _) → True
+          _              → False
 
     it "parses any dotted list of atoms" $ do
-      forAll dottedList $ \ s →
-        counterDotted s $ case readExpr s of { Right (DottedList _ _) → True ; _ → False }
+      forAll dottedList $ \ s → reportDotted s $
+        case readExpr s of
+          Right (DottedList _ _) → True
+          _                      → False
+
+    it "parses single-quote syntactic sugar" $ do
+      forAll quoted $ \ s → reportQuoted s $
+        case readExpr s of
+          Right (List [Atom "quote", _]) → True
+          _                              → False
 
     where
       counterexample' e s = counterexample ("Got " ++ show s ++ " instead of " ++ e)
-      counterList   = counterexample' "parenthesized list"
-      counterDotted = counterexample' "dotted list"
+      reportList   = counterexample' "parenthesized list"
+      reportDotted = counterexample' "dotted list"
+      reportQuoted = counterexample' "single-quoted datum"
 
 stringWithoutEscapes ∷ Gen String
 stringWithoutEscapes = arbitrary `suchThat` (all (`notElem` ['\\', '"']))
@@ -75,6 +86,7 @@ atomId = do c  ← oneof [letter, specialInit]
     where letter = arbitrary `suchThat` isLetter
           digit = arbitrary `suchThat` isDigit
           -- cf. http://www.schemers.org/Documents/Standards/R5RS/HTML/r5rs-Z-H-10.html#%_sec_7.1.1
+          -- nonterminals ⟨special initial⟩ and ⟨special subsequent⟩
           specialInit = elements "!$%&*/:<=>?^_~"
           specialSubs = elements "+-@."
 
@@ -102,3 +114,7 @@ dottedList ∷ Gen String
 dottedList = do initAtoms ← listOf1 atomId
                 lastAtom  ← atomId
                 return $ "(" ++ unwords initAtoms ++ " . " ++ lastAtom ++ ")"
+
+quoted ∷ Gen String
+quoted = datum >>= \ x → return $ "'" ++ x
+    where datum = oneof [atomId, decimal, parenthesizedList, dottedList]
