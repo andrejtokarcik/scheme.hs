@@ -52,18 +52,31 @@ spec =
       sequenceA_ $ map checkParse
         [("space", ' '), ("SPACE", ' '), ("newline", '\n'), ("NEWLINE", '\n')]
 
+    it "parses any parenthesized list of atoms" $ do
+      forAll parenthesizedList $ \ s →
+        counterList s $ case readExpr s of { Right (List _) → True ; _ → False }
+
+    it "parses any dotted list of atoms" $ do
+      forAll dottedList $ \ s →
+        counterDotted s $ case readExpr s of { Right (DottedList _ _) → True ; _ → False }
+
+    where
+      counterexample' e s = counterexample ("Got " ++ show s ++ " instead of " ++ e)
+      counterList   = counterexample' "parenthesized list"
+      counterDotted = counterexample' "dotted list"
+
 stringWithoutEscapes ∷ Gen String
 stringWithoutEscapes = arbitrary `suchThat` (all (`notElem` ['\\', '"']))
 
 atomId ∷ Gen String
-atomId = do c  ← oneof [letter, special]
-            cs ← listOf $ oneof [letter, digit, special]
+atomId = do c  ← oneof [letter, specialInit]
+            cs ← listOf $ oneof [letter, digit, specialInit, specialSubs]
             return (c:cs)
     where letter = arbitrary `suchThat` isLetter
           digit = arbitrary `suchThat` isDigit
-          -- cf. http://www.schemers.org/Documents/Standards/R5RS/HTML/
-          -- nonterminals ⟨special initial⟩ and ⟨special subsequent⟩
-          special = elements "!$%&|*+-/:<=>?@^_~"
+          -- cf. http://www.schemers.org/Documents/Standards/R5RS/HTML/r5rs-Z-H-10.html#%_sec_7.1.1
+          specialInit = elements "!$%&*/:<=>?^_~"
+          specialSubs = elements "+-@."
 
 decimalDigit ∷ Gen Char
 decimalDigit = elements ['0'..'9']
@@ -80,3 +93,12 @@ octal = listOf1 $ elements ['0'..'7']
 hexadecimal ∷ Gen String
 hexadecimal = listOf1 $ oneof [decimalDigit, hexChar, toUpper <$> hexChar]
     where hexChar = elements ['a'..'f']
+
+parenthesizedList ∷ Gen String
+parenthesizedList = do atoms ← listOf1 atomId
+                       return $ "(" ++ unwords atoms ++ ")"
+
+dottedList ∷ Gen String
+dottedList = do initAtoms ← listOf1 atomId
+                lastAtom  ← atomId
+                return $ "(" ++ unwords initAtoms ++ " . " ++ lastAtom ++ ")"

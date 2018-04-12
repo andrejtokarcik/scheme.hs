@@ -17,11 +17,10 @@ readBin = fmap fst . listToMaybe . readInt 2 (`elem` "01") digitToInt
 
 parseAtom :: Parser LispVal
 parseAtom = do first <- letter <|> symbol
-               rest <- many (letter <|> digit <|> symbol <|> char '#')
+               rest <- many (letter <|> digit <|> symbol <|> oneOf "+-@.")
                return . Atom $ first : rest
   where
-      symbol :: Parser Char
-      symbol = oneOf "!$%&|*+-/:<=>?@^_~"
+      symbol = oneOf "!$%&*/:<=>?^_~"
 
 parseBool :: Parser LispVal
 parseBool = char '#' >>
@@ -76,8 +75,8 @@ parseList = fmap List $ parseExpr `sepBy` spaces
 
 parseDottedList :: Parser LispVal
 parseDottedList = do
-    first <- parseExpr `endBy` spaces
-    rest <- char '.' >> spaces >> parseExpr
+    first <- parseExpr `endBy1` spaces
+    rest  <- char '.' >> spaces >> parseExpr
     return $ DottedList (NonEmpty.fromList first) rest
 
 parseExpr :: Parser LispVal
